@@ -1,0 +1,6 @@
+[package]
+name = "yoda-reader-rust"
+version = "0.1.0"
+authors = ["Daniel McQuiston <daniel.pro@dehugo.net>"]
+
+[dependencies]
