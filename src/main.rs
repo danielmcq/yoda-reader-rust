@@ -1,8 +1,12 @@
+use local_types::to_u16le;
+use local_types::to_u32le;
+use local_types::to_u32;
 use std::io::Read;
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
 
+mod local_types;
 
 fn get_input_filename_from_environment () -> String {
     static YODA_INPUT_FILE_ENV_KEY: &'static str = "YODA_INPUT_FILE";//'
@@ -44,25 +48,6 @@ where
     buf
 }
 
-/**
- * to_u32
- * Credit to https://www.reddit.com/r/rust/comments/36ixl0/converting_a_vector_of_bits_to_an_integer/crehkpw/
- */
-fn to_u32(slice: &Vec<u8>) -> u32 {
-    slice.iter().rev().fold(0, |acc, &b| acc*2 + b as u32)
-}
-
-fn to_u32le(slice: &Vec<u8>) -> u32 {
-    slice.iter().rev().fold(0, |acc, &b| acc.rotate_left(8) + b as u32)
-}
-
-fn to_u16(slice: &Vec<u8>) -> u16 {
-    slice.iter().rev().fold(0, |acc, &b| acc*2 + b as u16)
-}
-
-fn to_u16le(slice: &Vec<u8>) -> u16 {
-    slice.iter().rev().fold(0, |acc, &b| acc.rotate_left(8) + b as u16)
-}
 
 fn version_reader <R> (reader: R)
 where
