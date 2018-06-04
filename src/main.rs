@@ -4,14 +4,28 @@ use std::fs::File;
 use std::io::BufReader;
 
 
-fn get_input_filename_from_environment () -> std::string::String {
+fn get_input_filename_from_environment () -> String {
     static YODA_INPUT_FILE_ENV_KEY: &'static str = "YODA_INPUT_FILE";//'
-    let yoda_input_file_name = String::new();
+    let input_filename = String::new();
 
     match env::var(YODA_INPUT_FILE_ENV_KEY) {
-        Ok(yoda_input_file_name) => yoda_input_file_name,
-        Err(_) => yoda_input_file_name,
+        Ok(input_filename) => input_filename,
+        Err(_) => {
+            println!("Environment variable {:?} could not be read.", YODA_INPUT_FILE_ENV_KEY);
+            input_filename
+        },
     }
+}
+
+fn get_input_filename_from_args () -> String {
+    let mut input_filename = String::new();
+    let args: Vec<_> = env::args().collect();
+
+    if args.len() > 1 {
+        input_filename = args[1].clone();
+    }
+
+    input_filename
 }
 
 /**
@@ -138,12 +152,22 @@ fn parse_input_file (file: &File) {
     }
 }
 
-fn main() {
-    let yoda_input_file_name = get_input_filename_from_environment();
+fn get_input_filename () -> String {
+    let mut input_filename = get_input_filename_from_environment();
 
-    println!("Opening file: {:?}", yoda_input_file_name);
-    match File::open(&yoda_input_file_name) {
+    if input_filename.is_empty() {
+        input_filename = get_input_filename_from_args();
+    }
+
+    input_filename
+}
+
+fn main() {
+    let input_filename = get_input_filename();
+
+    println!("Opening file: {:?}", input_filename);
+    match File::open(&input_filename) {
         Ok(file) => parse_input_file(&file),
-        Err(e)  => panic!("Failed to open file named: {:?}: {}", &yoda_input_file_name, e),
+        Err(e) => panic!("Failed to open file named: {:?}: {}", &input_filename, e),
     };
 }
