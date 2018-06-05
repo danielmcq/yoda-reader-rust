@@ -78,6 +78,16 @@ where
     zone_size
 }
 
+fn sound_filename_size_reader <R> (reader: R) -> u32
+where
+    R: Read,
+{
+    let sound_filename_size = read_n(reader, 2);
+    let sound_filename_size = to_u16le(&sound_filename_size);
+    // println!("    Sound filename size: {}", sound_filename_size.clone());
+    sound_filename_size.into()
+}
+
 fn generic_section_reader <R> (mut reader: R)
 where
     R: Read,
@@ -93,6 +103,38 @@ where
 
     let tile_section_size = section_size_reader(&mut reader);
     let _tile_section_data = read_n(&mut reader, tile_section_size);
+}
+
+fn sound_section_reader <R> (mut reader: R)
+where
+    R: Read,
+{
+    let mut total_sounds = 0;
+    let mut section_size = section_size_reader(&mut reader);
+    let mut sounds: Vec<String> = vec![];
+
+    read_n(&mut reader, 2);
+    section_size = section_size - 2;
+
+    while section_size > 0 {
+
+        let sound_filename_length = sound_filename_size_reader(&mut reader);
+        section_size = section_size - 2;
+        // println!("    Sound filename length: {}", sound_filename_length);
+
+        let mut sound_filename_data = read_n(&mut reader, sound_filename_length);
+        sound_filename_data.pop();
+        let sound_filename = match String::from_utf8(sound_filename_data) {
+            Ok(v) => v,
+            Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+        };
+
+        println!("    Sound {:#} filename: {}", total_sounds, sound_filename);
+        sounds.push(sound_filename);
+        total_sounds = total_sounds + 1;
+        section_size = section_size - sound_filename_length;
+    }
+    // println!("Sounds: {:?}", sounds);
 }
 
 fn zone_reader <R> (mut reader: R)
@@ -123,7 +165,7 @@ fn parse_input_file (file: &File) {
         match section.as_ref() {
             "VERS" => version_reader(&mut reader),
             "STUP" => generic_section_reader(&mut reader),
-            "SNDS" => generic_section_reader(&mut reader),
+            "SNDS" => sound_section_reader(&mut reader),
             "PUZ2" => generic_section_reader(&mut reader),
             "CHAR" => generic_section_reader(&mut reader),
             "CHWP" => generic_section_reader(&mut reader),

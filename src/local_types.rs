@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 /**
  * to_u32
  * Credit to https://www.reddit.com/r/rust/comments/36ixl0/converting_a_vector_of_bits_to_an_integer/crehkpw/
