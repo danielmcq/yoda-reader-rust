@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 mod local_types;
+mod tile;
 
 fn get_input_filename_from_environment () -> String {
     static YODA_INPUT_FILE_ENV_KEY: &'static str = "YODA_INPUT_FILE";//'
@@ -96,15 +97,6 @@ where
     let _section_data = read_n(&mut reader, section_size);
 }
 
-fn tile_reader <R> (mut reader: R)
-where
-    R: Read,
-{
-
-    let tile_section_size = section_size_reader(&mut reader);
-    let _tile_section_data = read_n(&mut reader, tile_section_size);
-}
-
 fn sound_section_reader <R> (mut reader: R)
 where
     R: Read,
@@ -171,7 +163,7 @@ fn parse_input_file (file: &File) {
             "CHWP" => generic_section_reader(&mut reader),
             "CAUX" => generic_section_reader(&mut reader),
             "TNAM" => generic_section_reader(&mut reader),
-            "TILE" => tile_reader(&mut reader),
+            "TILE" => tile::parse_section(&mut reader),
             "ZONE" => zone_reader(&mut reader),
             "ENDF" => break,
             _ => panic!("Unknown section: {:?}", section),
