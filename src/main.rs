@@ -1,3 +1,5 @@
+extern crate image;
+
 use local_types::to_u16le;
 use local_types::to_u32le;
 use local_types::to_u32;

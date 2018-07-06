@@ -1,12 +1,10 @@
-extern crate image;
-
+use image::{ImageBuffer,Rgba,RgbaImage};
 use local_types::to_u16;
 use std::io::Read;
 use section_size_reader;
 use read_n;
 
-
-const TILE_SECTION_LENGTH_HEADER_SIZE_IN_BYTES: u32 = 4;
+// const TILE_SECTION_LENGTH_HEADER_SIZE_IN_BYTES: u32 = 4;
 
 const TILE_HEADER_LENGTH_IN_BYTES: u32 = 4;
 const TILE_PIXEL_SIZE_IN_BYTES: u32 = 1;
@@ -16,18 +14,14 @@ const TILE_WIDTH: u32 = 32;
 const TILE_SIZE_IN_BYTES: u32 = TILE_HEIGHT*TILE_WIDTH*TILE_PIXEL_SIZE_IN_BYTES;
 const TILE_TOTAL_SIZE_IN_BYTES: u32 = TILE_SIZE_IN_BYTES+TILE_HEADER_LENGTH_IN_BYTES;
 
-// pub struct Bmp {
-
+// pub struct TileFlags {
+//     game_object: bool,
 // }
 
-pub struct TileFlags {
-    game_object: bool,
-}
-
-pub struct Tile {
-    bmp: Vec<u8>,
-    header: TileFlags,
-}
+// pub struct Tile {
+//     bmp: Vec<u8>,
+//     header: TileFlags,
+// }
 
 pub fn parse_section <R> (mut reader: R)
 where
@@ -38,24 +32,26 @@ where
     let total_tiles = section_size / TILE_TOTAL_SIZE_IN_BYTES;
 
     for i in 0..total_tiles {
-        println!("here, {}", i);
-        let _tile_data = read_tile_data_section(&mut reader);
+        // println!("    Tile {}", i);
+        let tile_data = read_tile_data_section(&mut reader);
+        let mut file_name: String = "./tiles/tile_".to_owned();
+        file_name.push_str(&i.to_string());
+        file_name.push_str(".png");
+        tile_data.save(file_name).unwrap();
     }
-    // let _section_data = read_n(&mut reader, section_size);
 }
 
-fn read_tile_data_section <R> (mut reader: R) -> Tile
+fn read_tile_data_section <R> (mut reader: R) -> RgbaImage
 where
     R: Read,
 {
     let palette = get_palette();
     let _header_raw = read_n(&mut reader, 4);
-    // let mut bmp: Vec<u8> = vec![];
-    let mut bmp = image::ImageBuffer{height: TILE_HEIGHT, width: TILE_WIDTH};
+    let mut bmp = ImageBuffer::new(TILE_HEIGHT, TILE_WIDTH);
 
     for i in 0..TILE_SIZE_IN_BYTES {
         let pixel_data = read_n(&mut reader, 1);
-        let pixel_value = to_u16(&pixel_data) as u8;
+        let pixel_value = to_u16(&pixel_data);
         let x = i%TILE_WIDTH;
         let i_f64 = i as f64;
         let tile_height_f64 = TILE_HEIGHT as f64;
@@ -71,14 +67,11 @@ where
         let b = b as usize;
         let b = palette[b];
         let a = 0xff;
-        let pixel = image::Rgba{data: [r, g, b, a]};
+        let pixel = Rgba{data: [r, g, b, a]};
         bmp.put_pixel(x, y, pixel);
     }
 
-
-
-    let tile = Tile{bmp: vec![], header: TileFlags{game_object: false}};
-    tile
+    bmp
 }
 
 fn get_palette () -> Vec<u8> {
