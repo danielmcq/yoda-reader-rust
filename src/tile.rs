@@ -4,8 +4,6 @@ use std::io::Read;
 use section_size_reader;
 use read_n;
 
-// const TILE_SECTION_LENGTH_HEADER_SIZE_IN_BYTES: u32 = 4;
-
 const TILE_HEADER_LENGTH_IN_BYTES: u32 = 4;
 const TILE_PIXEL_SIZE_IN_BYTES: u32 = 1;
 const TILE_HEIGHT: u32 = 32;
@@ -46,7 +44,7 @@ where
     R: Read,
 {
     let palette = get_palette();
-    let _header_raw = read_n(&mut reader, 4);
+    let _header_raw = read_n(&mut reader, TILE_HEADER_LENGTH_IN_BYTES);
     let mut bmp = ImageBuffer::new(TILE_HEIGHT, TILE_WIDTH);
 
     for i in 0..TILE_SIZE_IN_BYTES {
@@ -66,7 +64,11 @@ where
         let b = pixel_value*4+0;
         let b = b as usize;
         let b = palette[b];
-        let a = 0xff;
+
+        let mut a = 0xff;
+        if r == 0 && g == 0 && b == 0 {
+            a = 0x00;
+        }
         let pixel = Rgba{data: [r, g, b, a]};
         bmp.put_pixel(x, y, pixel);
     }
