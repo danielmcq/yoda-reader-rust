@@ -25,7 +25,8 @@ fn get_input_filename_from_environment () -> String {
 }
 
 fn get_input_filename_from_args () -> String {
-    let mut input_filename = String::new();
+    // let mut input_filename = String::new();
+    let mut input_filename;
     let args: Vec<_> = env::args().collect();
 
     if args.len() > 1 {
@@ -67,7 +68,7 @@ where
 {
     let section_size = read_n(reader, 4);
     let section_size = to_u32le(&section_size);
-    println!("    Section size: {}", section_size.clone());
+    println!("    Section size: {}", section_size);
     section_size
 }
 
@@ -154,7 +155,7 @@ fn parse_input_file (file: &File) {
     loop {
         let section = read_n(&mut reader, SECTION_NAME_SIZE);
         let section = String::from_utf8(section).unwrap();
-        println!("Read section: {}", section);
+        println!("Read section: {}", section.clone());
 
         match section.as_ref() {
             "VERS" => version_reader(&mut reader),
@@ -186,7 +187,7 @@ fn get_input_filename () -> String {
 fn main() {
     let input_filename = get_input_filename();
 
-    println!("Opening file: {:?}", input_filename);
+    println!("Opening file: {:?}", input_filename.clone());
     match File::open(&input_filename) {
         Ok(file) => parse_input_file(&file),
         Err(e) => panic!("Failed to open file named: {:?}: {}", &input_filename, e),
